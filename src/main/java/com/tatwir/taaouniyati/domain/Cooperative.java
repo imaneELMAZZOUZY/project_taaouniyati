@@ -40,7 +40,7 @@ public class Cooperative {
     private String photo;
 
     @Column
-    private String adresse;
+    private String address;
 
     @Column
     private String telephone;

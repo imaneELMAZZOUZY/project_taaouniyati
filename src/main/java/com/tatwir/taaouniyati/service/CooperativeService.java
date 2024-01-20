@@ -63,7 +63,7 @@ public class CooperativeService {
         cooperativeDTO.setDescription(cooperative.getDescription());
         cooperativeDTO.setLocalisation(cooperative.getLocalisation());
         cooperativeDTO.setPhoto(cooperative.getPhoto());
-        cooperativeDTO.setAdresse(cooperative.getAdresse());
+        cooperativeDTO.setAddress(cooperative.getAddress());
         cooperativeDTO.setTelephone(cooperative.getTelephone());
         cooperativeDTO.setEstValide(cooperative.getEstValide());
         cooperativeDTO.setAdmin(cooperative.getAdmin() == null ? null : cooperative.getAdmin().getId());
@@ -78,7 +78,7 @@ public class CooperativeService {
         cooperative.setDescription(cooperativeDTO.getDescription());
         cooperative.setLocalisation(cooperativeDTO.getLocalisation());
         cooperative.setPhoto(cooperativeDTO.getPhoto());
-        cooperative.setAdresse(cooperativeDTO.getAdresse());
+        cooperative.setAddress(cooperativeDTO.getAddress());
         cooperative.setTelephone(cooperativeDTO.getTelephone());
         cooperative.setEstValide(cooperativeDTO.getEstValide());
         final Admin admin = cooperativeDTO.getAdmin() == null ? null : adminRepository.findById(cooperativeDTO.getAdmin())

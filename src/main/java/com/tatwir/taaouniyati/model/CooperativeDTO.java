@@ -34,7 +34,7 @@ public class CooperativeDTO {
     private String photo;
 
     @Size(max = 255)
-    private String adresse;
+    private String address;
 
     @Size(max = 255)
     private String telephone;
