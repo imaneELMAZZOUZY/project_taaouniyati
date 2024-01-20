@@ -39,6 +39,9 @@ public class Produit {
     @Column
     private Boolean estValide;
 
+    @Column
+    private Boolean inStock;
+
     @ManyToMany(mappedBy = "produits")
     private Set<Client> clients;
 

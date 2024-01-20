@@ -29,6 +29,8 @@ public class ProduitDTO {
 
     private Boolean estValide;
 
+    private Boolean inStock;
+
     @Size(max = 255)
     private String categorie;
 

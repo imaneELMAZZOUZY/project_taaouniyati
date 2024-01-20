@@ -82,6 +82,7 @@ public class ProduitService {
         produitDTO.setPhoto(produit.getPhoto());
         produitDTO.setPoids(produit.getPoids());
         produitDTO.setEstValide(produit.getEstValide());
+        produitDTO.setInStock(produit.getInStock());
         produitDTO.setCategorie(produit.getCategorie() == null ? null : produit.getCategorie().getId());
         produitDTO.setCooperative(produit.getCooperative() == null ? null : produit.getCooperative().getId());
         produitDTO.setAdmin(produit.getAdmin() == null ? null : produit.getAdmin().getId());
@@ -95,6 +96,7 @@ public class ProduitService {
         produit.setPhoto(produitDTO.getPhoto());
         produit.setPoids(produitDTO.getPoids());
         produit.setEstValide(produitDTO.getEstValide());
+        produit.setInStock(produitDTO.getInStock());
         final Categorie categorie = produitDTO.getCategorie() == null ? null : categorieRepository.findById(produitDTO.getCategorie())
                 .orElseThrow(() -> new NotFoundException("categorie not found"));
         produit.setCategorie(categorie);
