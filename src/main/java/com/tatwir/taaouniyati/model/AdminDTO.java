@@ -10,21 +10,16 @@ import lombok.Setter;
 @Setter
 public class AdminDTO {
 
-    @Size(max = 255)
-    private String id;
+    private Long id;
 
-    @Size(max = 255)
     private String nom;
 
-    @Size(max = 255)
     private String prenom;
 
     @NotNull
-    @Size(max = 255)
     private String email;
 
     @NotNull
-    @Size(max = 255)
     private String password;
 
 }

@@ -25,27 +25,26 @@ public class AdminService {
                 .toList();
     }
 
-    public AdminDTO get(final String id) {
+    public AdminDTO get(final Long id) {
         return adminRepository.findById(id)
                 .map(admin -> mapToDTO(admin, new AdminDTO()))
                 .orElseThrow(NotFoundException::new);
     }
 
-    public String create(final AdminDTO adminDTO) {
+    public Long create(final AdminDTO adminDTO) {
         final Admin admin = new Admin();
         mapToEntity(adminDTO, admin);
-        admin.setId(adminDTO.getId());
         return adminRepository.save(admin).getId();
     }
 
-    public void update(final String id, final AdminDTO adminDTO) {
+    public void update(final Long id, final AdminDTO adminDTO) {
         final Admin admin = adminRepository.findById(id)
                 .orElseThrow(NotFoundException::new);
         mapToEntity(adminDTO, admin);
         adminRepository.save(admin);
     }
 
-    public void delete(final String id) {
+    public void delete(final Long id) {
         adminRepository.deleteById(id);
     }
 
@@ -66,8 +65,8 @@ public class AdminService {
         return admin;
     }
 
-    public boolean idExists(final String id) {
-        return adminRepository.existsByIdIgnoreCase(id);
+    public boolean EmailExists(final String email) {
+        return adminRepository.existsByEmailIgnoreCase(email);
     }
 
     public boolean emailExists(final String email) {

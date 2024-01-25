@@ -9,13 +9,10 @@ import lombok.Setter;
 @Setter
 public class CategorieDTO {
 
-    @Size(max = 255)
-    private String id;
+    private Long id;
 
-    @Size(max = 255)
     private String nom;
 
-    @Size(max = 255)
     private String description;
 
 }

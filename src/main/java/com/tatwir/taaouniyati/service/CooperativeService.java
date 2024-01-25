@@ -30,27 +30,26 @@ public class CooperativeService {
                 .toList();
     }
 
-    public CooperativeDTO get(final String id) {
+    public CooperativeDTO get(final Long id) {
         return cooperativeRepository.findById(id)
                 .map(cooperative -> mapToDTO(cooperative, new CooperativeDTO()))
                 .orElseThrow(NotFoundException::new);
     }
 
-    public String create(final CooperativeDTO cooperativeDTO) {
+    public Long create(final CooperativeDTO cooperativeDTO) {
         final Cooperative cooperative = new Cooperative();
         mapToEntity(cooperativeDTO, cooperative);
-        cooperative.setId(cooperativeDTO.getId());
         return cooperativeRepository.save(cooperative).getId();
     }
 
-    public void update(final String id, final CooperativeDTO cooperativeDTO) {
+    public void update(final Long id, final CooperativeDTO cooperativeDTO) {
         final Cooperative cooperative = cooperativeRepository.findById(id)
                 .orElseThrow(NotFoundException::new);
         mapToEntity(cooperativeDTO, cooperative);
         cooperativeRepository.save(cooperative);
     }
 
-    public void delete(final String id) {
+    public void delete(final Long id) {
         cooperativeRepository.deleteById(id);
     }
 
@@ -87,9 +86,6 @@ public class CooperativeService {
         return cooperative;
     }
 
-    public boolean idExists(final String id) {
-        return cooperativeRepository.existsByIdIgnoreCase(id);
-    }
 
     public boolean emailExists(final String email) {
         return cooperativeRepository.existsByEmailIgnoreCase(email);

@@ -6,11 +6,10 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 
-public interface ClientRepository extends JpaRepository<Client, String> {
+public interface ClientRepository extends JpaRepository<Client, Long> {
 
     List<Client> findAllByProduits(Produit produit);
 
-    boolean existsByIdIgnoreCase(String id);
 
     boolean existsByEmailIgnoreCase(String email);
 

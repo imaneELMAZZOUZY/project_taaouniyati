@@ -1,11 +1,7 @@
 package com.tatwir.taaouniyati.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.*;
+
 import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,8 +13,9 @@ import lombok.Setter;
 public class Client {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false, updatable = false)
-    private String id;
+    private Long id;
 
     @Column
     private String nom;
@@ -37,9 +34,9 @@ public class Client {
 
     @ManyToMany
     @JoinTable(
-            name = "ProduitsClients",
-            joinColumns = @JoinColumn(name = "clientId"),
-            inverseJoinColumns = @JoinColumn(name = "produitId")
+            name = "produits_clients",
+            joinColumns = @JoinColumn(name = "client_id"),
+            inverseJoinColumns = @JoinColumn(name = "produit_id")
     )
     private Set<Produit> produits;
 

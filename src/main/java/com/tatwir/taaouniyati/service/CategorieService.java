@@ -25,27 +25,26 @@ public class CategorieService {
                 .toList();
     }
 
-    public CategorieDTO get(final String id) {
+    public CategorieDTO get(final Long id) {
         return categorieRepository.findById(id)
                 .map(categorie -> mapToDTO(categorie, new CategorieDTO()))
                 .orElseThrow(NotFoundException::new);
     }
 
-    public String create(final CategorieDTO categorieDTO) {
+    public Long create(final CategorieDTO categorieDTO) {
         final Categorie categorie = new Categorie();
         mapToEntity(categorieDTO, categorie);
-        categorie.setId(categorieDTO.getId());
         return categorieRepository.save(categorie).getId();
     }
 
-    public void update(final String id, final CategorieDTO categorieDTO) {
+    public void update(final Long id, final CategorieDTO categorieDTO) {
         final Categorie categorie = categorieRepository.findById(id)
                 .orElseThrow(NotFoundException::new);
         mapToEntity(categorieDTO, categorie);
         categorieRepository.save(categorie);
     }
 
-    public void delete(final String id) {
+    public void delete(final Long id) {
         categorieRepository.deleteById(id);
     }
 
@@ -62,8 +61,8 @@ public class CategorieService {
         return categorie;
     }
 
-    public boolean idExists(final String id) {
-        return categorieRepository.existsByIdIgnoreCase(id);
+    public boolean categorieExists(final String nom) {
+        return categorieRepository.existsByNomIgnoreCase(nom);
     }
 
 }

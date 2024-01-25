@@ -13,7 +13,8 @@ import com.tatwir.taaouniyati.repos.ProduitRepository;
 import com.tatwir.taaouniyati.util.NotFoundException;
 import jakarta.transaction.Transactional;
 import java.util.List;
-import org.springframework.data.domain.Sort;
+
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 
@@ -38,6 +39,35 @@ public class ProduitService {
         this.clientRepository = clientRepository;
     }
 
+    public Page<ProduitDTO> getAllProduitsWithFilter(Long cooperativeId, Long categorieId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+
+        ExampleMatcher exampleMatcher = ExampleMatcher.matching()
+                .withIgnoreCase()
+                .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
+
+        Produit exampleProduit = new Produit();
+
+        if (cooperativeId != null) {
+            Cooperative cooperative = cooperativeRepository.findById(cooperativeId)
+                    .orElseThrow(() -> new NotFoundException("Cooperative not found with id: " + cooperativeId));
+            exampleProduit.setCooperative(cooperative);
+        }
+
+        if (categorieId != null) {
+            Categorie categorie = categorieRepository.findById(categorieId)
+                    .orElseThrow(() -> new NotFoundException("Categorie not found with id: " + categorieId));
+            exampleProduit.setCategorie(categorie);
+        }
+
+        Example<Produit> example = Example.of(exampleProduit, exampleMatcher);
+
+        Page<Produit> produitsPage = produitRepository.findAll(example, pageable);
+        return produitsPage.map(produit -> mapToDTO(produit, new ProduitDTO()));
+    }
+
+
     public List<ProduitDTO> findAll() {
         final List<Produit> produits = produitRepository.findAll(Sort.by("id"));
         return produits.stream()
@@ -45,27 +75,27 @@ public class ProduitService {
                 .toList();
     }
 
-    public ProduitDTO get(final String id) {
+
+    public ProduitDTO get(final Long id) {
         return produitRepository.findById(id)
                 .map(produit -> mapToDTO(produit, new ProduitDTO()))
                 .orElseThrow(NotFoundException::new);
     }
 
-    public String create(final ProduitDTO produitDTO) {
+    public Long create(final ProduitDTO produitDTO) {
         final Produit produit = new Produit();
         mapToEntity(produitDTO, produit);
-        produit.setId(produitDTO.getId());
         return produitRepository.save(produit).getId();
     }
 
-    public void update(final String id, final ProduitDTO produitDTO) {
+    public void update(final Long id, final ProduitDTO produitDTO) {
         final Produit produit = produitRepository.findById(id)
                 .orElseThrow(NotFoundException::new);
         mapToEntity(produitDTO, produit);
         produitRepository.save(produit);
     }
 
-    public void delete(final String id) {
+    public void delete(final Long id) {
         final Produit produit = produitRepository.findById(id)
                 .orElseThrow(NotFoundException::new);
         // remove many-to-many relations at owning side
@@ -109,8 +139,5 @@ public class ProduitService {
         return produit;
     }
 
-    public boolean idExists(final String id) {
-        return produitRepository.existsByIdIgnoreCase(id);
-    }
 
 }

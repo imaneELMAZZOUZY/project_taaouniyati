@@ -36,36 +36,34 @@ public class ClientResource {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ClientDTO> getClient(@PathVariable(name = "id") final String id) {
+    public ResponseEntity<ClientDTO> getClient(@PathVariable(name = "id") final Long id) {
         return ResponseEntity.ok(clientService.get(id));
     }
 
     @PostMapping
-    public ResponseEntity<String> createClient(@RequestBody @Valid final ClientDTO clientDTO,
+    public ResponseEntity<Long> createClient(@RequestBody @Valid final ClientDTO clientDTO,
             final BindingResult bindingResult) throws MethodArgumentNotValidException {
-        if (!bindingResult.hasFieldErrors("id") && clientDTO.getId() == null) {
-            bindingResult.rejectValue("id", "NotNull");
-        }
-        if (!bindingResult.hasFieldErrors("id") && clientService.idExists(clientDTO.getId())) {
-            bindingResult.rejectValue("id", "Exists.client.id");
+
+        if (clientService.emailExists(clientDTO.getEmail())) {
+            bindingResult.rejectValue("email", "Exists.client.email");
         }
         if (bindingResult.hasErrors()) {
             throw new MethodArgumentNotValidException(new MethodParameter(
                     this.getClass().getDeclaredMethods()[0], -1), bindingResult);
         }
-        final String createdId = clientService.create(clientDTO);
+        final Long createdId = clientService.create(clientDTO);
         return new ResponseEntity<>(createdId, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateClient(@PathVariable(name = "id") final String id,
+    public ResponseEntity<Long> updateClient(@PathVariable(name = "id") final Long id,
             @RequestBody @Valid final ClientDTO clientDTO) {
         clientService.update(id, clientDTO);
         return ResponseEntity.ok(id);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteClient(@PathVariable(name = "id") final String id) {
+    public ResponseEntity<Void> deleteClient(@PathVariable(name = "id") final Long id) {
         clientService.delete(id);
         return ResponseEntity.noContent().build();
     }

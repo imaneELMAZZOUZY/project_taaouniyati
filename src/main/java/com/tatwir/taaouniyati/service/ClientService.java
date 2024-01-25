@@ -34,27 +34,26 @@ public class ClientService {
                 .toList();
     }
 
-    public ClientDTO get(final String id) {
+    public ClientDTO get(final Long id) {
         return clientRepository.findById(id)
                 .map(client -> mapToDTO(client, new ClientDTO()))
                 .orElseThrow(NotFoundException::new);
     }
 
-    public String create(final ClientDTO clientDTO) {
+    public Long create(final ClientDTO clientDTO) {
         final Client client = new Client();
         mapToEntity(clientDTO, client);
-        client.setId(clientDTO.getId());
         return clientRepository.save(client).getId();
     }
 
-    public void update(final String id, final ClientDTO clientDTO) {
+    public void update(final Long id, final ClientDTO clientDTO) {
         final Client client = clientRepository.findById(id)
                 .orElseThrow(NotFoundException::new);
         mapToEntity(clientDTO, client);
         clientRepository.save(client);
     }
 
-    public void delete(final String id) {
+    public void delete(final Long id) {
         clientRepository.deleteById(id);
     }
 
@@ -86,9 +85,6 @@ public class ClientService {
         return client;
     }
 
-    public boolean idExists(final String id) {
-        return clientRepository.existsByIdIgnoreCase(id);
-    }
 
     public boolean emailExists(final String email) {
         return clientRepository.existsByEmailIgnoreCase(email);
