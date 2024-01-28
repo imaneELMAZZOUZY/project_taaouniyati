@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-
+@CrossOrigin("*")
 @RestController
 @RequestMapping(value = "/api/cooperatives", produces = MediaType.APPLICATION_JSON_VALUE)
 public class CooperativeResource {

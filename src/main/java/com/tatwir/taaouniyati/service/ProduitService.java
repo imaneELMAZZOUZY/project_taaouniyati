@@ -1,9 +1,6 @@
 package com.tatwir.taaouniyati.service;
 
-import com.tatwir.taaouniyati.domain.Admin;
-import com.tatwir.taaouniyati.domain.Categorie;
-import com.tatwir.taaouniyati.domain.Cooperative;
-import com.tatwir.taaouniyati.domain.Produit;
+import com.tatwir.taaouniyati.domain.*;
 import com.tatwir.taaouniyati.model.ProduitDTO;
 import com.tatwir.taaouniyati.repos.AdminRepository;
 import com.tatwir.taaouniyati.repos.CategorieRepository;
@@ -13,6 +10,7 @@ import com.tatwir.taaouniyati.repos.ProduitRepository;
 import com.tatwir.taaouniyati.util.NotFoundException;
 import jakarta.transaction.Transactional;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -39,10 +37,38 @@ public class ProduitService {
         this.clientRepository = clientRepository;
     }
 
-    public Page<ProduitDTO> getAllProduitsWithFilter(Long cooperativeId, Long categorieId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+//    public Page<ProduitDTO> getAllProduitsWithFilter(Long cooperativeId, Long categorieId, int page, int size) {
+//        Pageable pageable = PageRequest.of(page, size);
+//
+//
+//        ExampleMatcher exampleMatcher = ExampleMatcher.matching()
+//                .withIgnoreCase()
+//                .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
+//
+//        Produit exampleProduit = new Produit();
+//
+//        if (cooperativeId != null) {
+//            Cooperative cooperative = cooperativeRepository.findById(cooperativeId)
+//                    .orElseThrow(() -> new NotFoundException("Cooperative not found with id: " + cooperativeId));
+////            System.out.p
+//            exampleProduit.setCooperative(cooperative);
+//        }
+//
+//        if (categorieId != null) {
+//            Categorie categorie = categorieRepository.findById(categorieId)
+//                    .orElseThrow(() -> new NotFoundException("Categorie not found with id: " + categorieId));
+//            exampleProduit.setCategorie(categorie);
+//        }
+//
+//        Example<Produit> example = Example.of(exampleProduit, exampleMatcher);
+//
+//        Page<Produit> produitsPage = produitRepository.findAll(example, pageable);
+//
+//        System.out.println(produitsPage.stream().collect(Collectors.toList()));
+//        return produitsPage.map(produit -> mapToDTO(produit, new ProduitDTO()));
+//    }
 
-
+    public List<ProduitDTO> getAllProduitsWithFilter(Long cooperativeId, Long categorieId) {
         ExampleMatcher exampleMatcher = ExampleMatcher.matching()
                 .withIgnoreCase()
                 .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
@@ -61,11 +87,18 @@ public class ProduitService {
             exampleProduit.setCategorie(categorie);
         }
 
+
         Example<Produit> example = Example.of(exampleProduit, exampleMatcher);
 
-        Page<Produit> produitsPage = produitRepository.findAll(example, pageable);
-        return produitsPage.map(produit -> mapToDTO(produit, new ProduitDTO()));
+        System.out.println(exampleProduit);
+        List<Produit> produitsList = produitRepository.findAll(example);
+
+        System.out.println(produitsList);
+        return produitsList.stream()
+                .map(produit -> mapToDTO(produit, new ProduitDTO()))
+                .collect(Collectors.toList());
     }
+
 
 
     public List<ProduitDTO> findAll() {
@@ -104,6 +137,19 @@ public class ProduitService {
         produitRepository.delete(produit);
     }
 
+
+    public boolean markProductAsInteresting(Long productId, String clientEmail)
+    {
+        Produit produit = produitRepository.findById(productId).orElse(null);
+        Client client  = clientRepository.findByEmail(clientEmail).orElse(null);
+        produit.getClients().add(client);
+        client.getProduits().add(produit);
+        clientRepository.save(client);
+        produitRepository.save(produit);
+        return true;
+        
+    }
+
     private ProduitDTO mapToDTO(final Produit produit, final ProduitDTO produitDTO) {
         produitDTO.setId(produit.getId());
         produitDTO.setNom(produit.getNom());
@@ -138,6 +184,8 @@ public class ProduitService {
         produit.setAdmin(admin);
         return produit;
     }
+
+
 
 
 }

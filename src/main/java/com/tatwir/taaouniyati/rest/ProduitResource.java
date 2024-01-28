@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-
+@CrossOrigin("*")
 @RestController
 @RequestMapping(value = "/api/produits", produces = MediaType.APPLICATION_JSON_VALUE)
 public class ProduitResource {
@@ -30,12 +30,10 @@ public class ProduitResource {
     }
 
     @GetMapping
-    public ResponseEntity<Page<ProduitDTO>> getProduitsWithFilter(
+    public ResponseEntity<List<ProduitDTO>> getProduitsWithFilter(
             @RequestParam(required = false) Long cooperativeId,
-            @RequestParam(required = false) Long categorie,
-            @RequestParam int page,
-            @RequestParam int size) {
-        Page<ProduitDTO> produits = produitService.getAllProduitsWithFilter(cooperativeId, categorie, page, size);
+            @RequestParam(required = false) Long categorieId){
+        List<ProduitDTO> produits = produitService.getAllProduitsWithFilter(cooperativeId, categorieId);
         return ResponseEntity.ok(produits);
     }
 
@@ -91,6 +89,15 @@ public class ProduitResource {
         produitService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/interest")
+
+public ResponseEntity<Boolean> markProductAsInteresting(@RequestParam("productId") Long productId,
+                                                     @RequestParam("clientEmail") String clientEmail)
+    {
+        return ResponseEntity.ok(produitService.markProductAsInteresting(productId,clientEmail));
+    }
+
 
 
 

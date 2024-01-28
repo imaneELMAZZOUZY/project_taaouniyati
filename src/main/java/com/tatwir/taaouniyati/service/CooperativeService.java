@@ -8,6 +8,7 @@ import com.tatwir.taaouniyati.repos.CooperativeRepository;
 import com.tatwir.taaouniyati.util.NotFoundException;
 import java.util.List;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 
@@ -16,11 +17,16 @@ public class CooperativeService {
 
     private final CooperativeRepository cooperativeRepository;
     private final AdminRepository adminRepository;
+    private final PasswordEncoder passwordEncoder;
+
 
     public CooperativeService(final CooperativeRepository cooperativeRepository,
-            final AdminRepository adminRepository) {
+            final AdminRepository adminRepository,
+            final PasswordEncoder passwordEncoder
+    ) {
         this.cooperativeRepository = cooperativeRepository;
         this.adminRepository = adminRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<CooperativeDTO> findAll() {
@@ -38,6 +44,7 @@ public class CooperativeService {
 
     public Long create(final CooperativeDTO cooperativeDTO) {
         final Cooperative cooperative = new Cooperative();
+        cooperativeDTO.setPassword(passwordEncoder.encode(cooperativeDTO.getPassword()));
         mapToEntity(cooperativeDTO, cooperative);
         return cooperativeRepository.save(cooperative).getId();
     }
@@ -45,6 +52,7 @@ public class CooperativeService {
     public void update(final Long id, final CooperativeDTO cooperativeDTO) {
         final Cooperative cooperative = cooperativeRepository.findById(id)
                 .orElseThrow(NotFoundException::new);
+
         mapToEntity(cooperativeDTO, cooperative);
         cooperativeRepository.save(cooperative);
     }

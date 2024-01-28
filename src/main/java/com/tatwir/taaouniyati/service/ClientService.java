@@ -7,11 +7,17 @@ import com.tatwir.taaouniyati.repos.ClientRepository;
 import com.tatwir.taaouniyati.repos.ProduitRepository;
 import com.tatwir.taaouniyati.util.NotFoundException;
 import jakarta.transaction.Transactional;
+
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StreamUtils;
 
 
 @Service
@@ -21,10 +27,14 @@ public class ClientService {
     private final ClientRepository clientRepository;
     private final ProduitRepository produitRepository;
 
+    private final PasswordEncoder passwordEncoder;
+
     public ClientService(final ClientRepository clientRepository,
-            final ProduitRepository produitRepository) {
+            final ProduitRepository produitRepository,
+                         final PasswordEncoder passwordEncoder) {
         this.clientRepository = clientRepository;
         this.produitRepository = produitRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<ClientDTO> findAll() {
@@ -41,9 +51,12 @@ public class ClientService {
     }
 
     public Long create(final ClientDTO clientDTO) {
+
         final Client client = new Client();
+        clientDTO.setPassword(passwordEncoder.encode(clientDTO.getPassword()));
         mapToEntity(clientDTO, client);
         return clientRepository.save(client).getId();
+
     }
 
     public void update(final Long id, final ClientDTO clientDTO) {
@@ -56,6 +69,8 @@ public class ClientService {
     public void delete(final Long id) {
         clientRepository.deleteById(id);
     }
+
+
 
     private ClientDTO mapToDTO(final Client client, final ClientDTO clientDTO) {
         clientDTO.setId(client.getId());
