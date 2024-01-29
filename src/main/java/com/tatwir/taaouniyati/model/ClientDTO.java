@@ -13,7 +13,7 @@ public class ClientDTO {
 
     private Long id;
 
-    private String nom;
+        private String nom;
 
     private String prenom;
 
