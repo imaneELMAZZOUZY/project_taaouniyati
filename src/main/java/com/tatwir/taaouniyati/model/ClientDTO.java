@@ -25,6 +25,7 @@ public class ClientDTO {
     @NotNull
     private String password;
 
-    private List<Long> produits;
+
+ //   private List<Long> produits;
 
 }

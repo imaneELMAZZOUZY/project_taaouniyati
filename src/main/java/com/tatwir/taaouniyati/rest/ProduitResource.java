@@ -1,7 +1,12 @@
 package com.tatwir.taaouniyati.rest;
 
+import com.tatwir.taaouniyati.domain.Cooperative;
+import com.tatwir.taaouniyati.domain.Produit;
 import com.tatwir.taaouniyati.model.ProduitDTO;
 import com.tatwir.taaouniyati.service.ProduitService;
+import com.tatwir.taaouniyati.service.CooperativeService;
+
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
@@ -24,19 +29,21 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 public class ProduitResource {
 
     private final ProduitService produitService;
+    private final CooperativeService cooperativeService;
 
-    public ProduitResource(final ProduitService produitService) {
+    public ProduitResource(final ProduitService produitService,
+            final CooperativeService cooperativeService) {
         this.produitService = produitService;
+        this.cooperativeService = cooperativeService;
     }
 
     @GetMapping
     public ResponseEntity<List<ProduitDTO>> getProduitsWithFilter(
             @RequestParam(required = false) Long cooperativeId,
-            @RequestParam(required = false) Long categorieId){
+            @RequestParam(required = false) Long categorieId) {
         List<ProduitDTO> produits = produitService.getAllProduitsWithFilter(cooperativeId, categorieId);
         return ResponseEntity.ok(produits);
     }
-
 
     @GetMapping("/{id}")
     public ResponseEntity<ProduitDTO> getProduit(@PathVariable(name = "id") final Long id) {
@@ -45,8 +52,8 @@ public class ProduitResource {
 
     @PostMapping
     public ResponseEntity<Long> createProduit(HttpServletRequest request,
-                                              @ModelAttribute final ProduitDTO produitDTO,
-                                              final BindingResult bindingResult) throws MethodArgumentNotValidException {
+            @ModelAttribute final ProduitDTO produitDTO,
+            final BindingResult bindingResult) throws MethodArgumentNotValidException {
 
         if (bindingResult.hasErrors()) {
             throw new MethodArgumentNotValidException(new MethodParameter(
@@ -68,8 +75,8 @@ public class ProduitResource {
 
     @PutMapping("/{id}")
     public ResponseEntity<Long> updateProduit(HttpServletRequest request,
-                                             @PathVariable(name = "id") final Long id,
-                                              @ModelAttribute final ProduitDTO produitDTO) {
+            @PathVariable(name = "id") final Long id,
+            @ModelAttribute final ProduitDTO produitDTO) {
 
         MultipartFile photo = ((MultipartHttpServletRequest) request).getFile("productphoto");
         if (photo != null && !photo.isEmpty()) {
@@ -92,14 +99,36 @@ public class ProduitResource {
 
     @PostMapping("/interest")
 
-public ResponseEntity<Boolean> markProductAsInteresting(@RequestParam("productId") Long productId,
-                                                     @RequestParam("clientEmail") String clientEmail)
-    {
-        return ResponseEntity.ok(produitService.markProductAsInteresting(productId,clientEmail));
+    public ResponseEntity<Boolean> markProductAsInteresting(@RequestParam("productId") Long productId,
+            @RequestParam("clientEmail") String clientEmail) {
+        return ResponseEntity.ok(produitService.markProductAsInteresting(productId, clientEmail));
     }
 
+    @GetMapping("/cooperative/{cooperativeId}")
+    public ResponseEntity<List<ProduitDTO>> getProduitsByCooperative(
+            @PathVariable(name = "cooperativeId") final Long cooperativeId) {
 
+        List<ProduitDTO> produits = produitService.getAllProduitsByCooperativeId(cooperativeId);
+        return ResponseEntity.ok(produits);
+    }
 
+    @PostMapping("/valider")
+    public ResponseEntity<Produit> validerProduit(@RequestParam("productId") Long productId,
+            @RequestParam("adminEmail") String adminEmail) {
+        try {
+            produitService.validerProduit(productId, adminEmail);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
+    @GetMapping("/nonvalides")
+    public ResponseEntity<List<ProduitDTO>> getProduitsNonValides() {
+        List<ProduitDTO> produitsNonValides = produitService.getProduitsNonValides();
+        return ResponseEntity.ok(produitsNonValides);
+    }
 
 }

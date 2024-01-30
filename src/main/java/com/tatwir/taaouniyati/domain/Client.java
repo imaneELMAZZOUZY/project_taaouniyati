@@ -3,9 +3,12 @@ package com.tatwir.taaouniyati.domain;
 import jakarta.persistence.*;
 
 import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import lombok.Getter;
 import lombok.Setter;
-
 
 @Entity
 @Getter
@@ -33,11 +36,10 @@ public class Client {
     private String password;
 
     @ManyToMany
-    @JoinTable(
-            name = "produits_clients",
-            joinColumns = @JoinColumn(name = "client_id"),
-            inverseJoinColumns = @JoinColumn(name = "produit_id")
-    )
+    
+    // @JsonManagedReference
+    @JoinTable(name = "produits_clients", joinColumns = @JoinColumn(name = "client_id"), inverseJoinColumns = @JoinColumn(name = "produit_id"))
+    @JsonIgnore
     private Set<Produit> produits;
 
 }

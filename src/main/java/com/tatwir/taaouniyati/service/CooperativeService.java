@@ -11,7 +11,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-
 @Service
 public class CooperativeService {
 
@@ -19,11 +18,9 @@ public class CooperativeService {
     private final AdminRepository adminRepository;
     private final PasswordEncoder passwordEncoder;
 
-
     public CooperativeService(final CooperativeRepository cooperativeRepository,
             final AdminRepository adminRepository,
-            final PasswordEncoder passwordEncoder
-    ) {
+            final PasswordEncoder passwordEncoder) {
         this.cooperativeRepository = cooperativeRepository;
         this.adminRepository = adminRepository;
         this.passwordEncoder = passwordEncoder;
@@ -61,7 +58,7 @@ public class CooperativeService {
         cooperativeRepository.deleteById(id);
     }
 
-    private CooperativeDTO mapToDTO(final Cooperative cooperative,
+    public CooperativeDTO mapToDTO(final Cooperative cooperative,
             final CooperativeDTO cooperativeDTO) {
         cooperativeDTO.setId(cooperative.getId());
         cooperativeDTO.setNom(cooperative.getNom());
@@ -88,12 +85,12 @@ public class CooperativeService {
         cooperative.setAddress(cooperativeDTO.getAddress());
         cooperative.setTelephone(cooperativeDTO.getTelephone());
         cooperative.setEstValide(cooperativeDTO.getEstValide());
-        final Admin admin = cooperativeDTO.getAdmin() == null ? null : adminRepository.findById(cooperativeDTO.getAdmin())
-                .orElseThrow(() -> new NotFoundException("admin not found"));
+        final Admin admin = cooperativeDTO.getAdmin() == null ? null
+                : adminRepository.findById(cooperativeDTO.getAdmin())
+                        .orElseThrow(() -> new NotFoundException("admin not found"));
         cooperative.setAdmin(admin);
         return cooperative;
     }
-
 
     public boolean emailExists(final String email) {
         return cooperativeRepository.existsByEmailIgnoreCase(email);

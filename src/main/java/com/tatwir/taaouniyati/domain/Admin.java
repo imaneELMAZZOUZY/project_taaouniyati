@@ -3,6 +3,9 @@ package com.tatwir.taaouniyati.domain;
 import jakarta.persistence.*;
 
 import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -28,9 +31,11 @@ public class Admin {
     @Column(nullable = false)
     private String password;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "admin")
     private Set<Cooperative> cooperativesValides;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "admin")
     private Set<Produit> produitsValides;
 

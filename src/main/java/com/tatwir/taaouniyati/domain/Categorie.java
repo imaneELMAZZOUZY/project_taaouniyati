@@ -3,9 +3,12 @@ package com.tatwir.taaouniyati.domain;
 import jakarta.persistence.*;
 
 import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.Getter;
 import lombok.Setter;
-
 
 @Entity
 @Getter
@@ -23,6 +26,7 @@ public class Categorie {
     private String description;
 
     @OneToMany(mappedBy = "categorie")
+    @JsonIgnore
     private Set<Produit> produits;
 
 }

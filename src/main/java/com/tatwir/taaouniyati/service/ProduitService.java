@@ -8,13 +8,15 @@ import com.tatwir.taaouniyati.repos.ClientRepository;
 import com.tatwir.taaouniyati.repos.CooperativeRepository;
 import com.tatwir.taaouniyati.repos.ProduitRepository;
 import com.tatwir.taaouniyati.util.NotFoundException;
+
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
-
 
 @Service
 @Transactional
@@ -25,48 +27,86 @@ public class ProduitService {
     private final CooperativeRepository cooperativeRepository;
     private final AdminRepository adminRepository;
     private final ClientRepository clientRepository;
+    private final AdminService adminService;
 
     public ProduitService(final ProduitRepository produitRepository,
             final CategorieRepository categorieRepository,
             final CooperativeRepository cooperativeRepository,
-            final AdminRepository adminRepository, final ClientRepository clientRepository) {
+            final AdminRepository adminRepository, final ClientRepository clientRepository,
+            final AdminService adminService) {
         this.produitRepository = produitRepository;
         this.categorieRepository = categorieRepository;
         this.cooperativeRepository = cooperativeRepository;
         this.adminRepository = adminRepository;
         this.clientRepository = clientRepository;
+        this.adminService = adminService;
     }
 
-//    public Page<ProduitDTO> getAllProduitsWithFilter(Long cooperativeId, Long categorieId, int page, int size) {
-//        Pageable pageable = PageRequest.of(page, size);
-//
-//
-//        ExampleMatcher exampleMatcher = ExampleMatcher.matching()
-//                .withIgnoreCase()
-//                .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
-//
-//        Produit exampleProduit = new Produit();
-//
-//        if (cooperativeId != null) {
-//            Cooperative cooperative = cooperativeRepository.findById(cooperativeId)
-//                    .orElseThrow(() -> new NotFoundException("Cooperative not found with id: " + cooperativeId));
-////            System.out.p
-//            exampleProduit.setCooperative(cooperative);
-//        }
-//
-//        if (categorieId != null) {
-//            Categorie categorie = categorieRepository.findById(categorieId)
-//                    .orElseThrow(() -> new NotFoundException("Categorie not found with id: " + categorieId));
-//            exampleProduit.setCategorie(categorie);
-//        }
-//
-//        Example<Produit> example = Example.of(exampleProduit, exampleMatcher);
-//
-//        Page<Produit> produitsPage = produitRepository.findAll(example, pageable);
-//
-//        System.out.println(produitsPage.stream().collect(Collectors.toList()));
-//        return produitsPage.map(produit -> mapToDTO(produit, new ProduitDTO()));
-//    }
+    public void validerProduit(Long productId, String adminEmail) {
+        Long adminId = adminService.getAdminIdByEmail(adminEmail);
+
+        if (adminId != null) {
+            Produit produit = produitRepository.findById(productId)
+                    .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + productId));
+
+            // Faites ici les validations nécessaires avant la validation
+            Admin admin = getAdminById(adminId);
+            produit.setEstValide(true);
+            produit.setAdmin(admin);
+
+            produitRepository.save(produit);
+        } else {
+            // Gérez le cas où l'administrateur n'est pas trouvé par email
+        }
+    }
+
+    public Admin getAdminById(Long adminId) {
+        return adminRepository.findById(adminId)
+                .orElseThrow(() -> new NotFoundException("Admin not found with id: " + adminId));
+    }
+
+    // public void validerProduit(Long produitId) {
+    // Optional<Produit> optionalProduit = produitRepository.findById(produitId);
+
+    // if (optionalProduit.isPresent()) {
+    // Produit produit = optionalProduit.get();
+    // produit.setEstValide(true); // Mettre à jour estValide à true
+    // produitRepository.save(produit);
+    // } else {
+    // throw new EntityNotFoundException("Produit non trouvé avec l'ID : " +
+    // produitId);
+    // }
+    // }
+
+    // public List<Produit> getProduitsNonValides() {
+    // return produitRepository.findByEstValideFalse();
+    // }
+
+    public List<ProduitDTO> getProduitsNonValides() {
+        List<Produit> produitsNonValides = produitRepository.findByEstValideFalse();
+
+        return produitsNonValides.stream()
+                .map(produit -> mapToDTO(produit, new ProduitDTO()))
+                .collect(Collectors.toList());
+    }
+
+    public Produit getProduitById(Long produitId) {
+        return produitRepository.findById(produitId)
+                .orElseThrow(() -> new NotFoundException("Produit not found with id: " + produitId));
+    }
+
+    public List<ProduitDTO> getAllProduitsByCooperativeId(Long cooperativeId) {
+        // Récupérer tous les produits de la coopérative spécifiée sans pagination ni
+        // filtrage par catégorie
+        List<Produit> produits = produitRepository.findByCooperativeId(cooperativeId);
+
+        // Mapper les produits en ProduitDTO
+        List<ProduitDTO> produitsDTO = produits.stream()
+                .map(produit -> mapToDTO(produit, new ProduitDTO()))
+                .collect(Collectors.toList());
+
+        return produitsDTO;
+    }
 
     public List<ProduitDTO> getAllProduitsWithFilter(Long cooperativeId, Long categorieId) {
         ExampleMatcher exampleMatcher = ExampleMatcher.matching()
@@ -87,7 +127,6 @@ public class ProduitService {
             exampleProduit.setCategorie(categorie);
         }
 
-
         Example<Produit> example = Example.of(exampleProduit, exampleMatcher);
 
         System.out.println(exampleProduit);
@@ -99,15 +138,12 @@ public class ProduitService {
                 .collect(Collectors.toList());
     }
 
-
-
     public List<ProduitDTO> findAll() {
         final List<Produit> produits = produitRepository.findAll(Sort.by("id"));
         return produits.stream()
                 .map(produit -> mapToDTO(produit, new ProduitDTO()))
                 .toList();
     }
-
 
     public ProduitDTO get(final Long id) {
         return produitRepository.findById(id)
@@ -137,17 +173,15 @@ public class ProduitService {
         produitRepository.delete(produit);
     }
 
-
-    public boolean markProductAsInteresting(Long productId, String clientEmail)
-    {
+    public boolean markProductAsInteresting(Long productId, String clientEmail) {
         Produit produit = produitRepository.findById(productId).orElse(null);
-        Client client  = clientRepository.findByEmail(clientEmail).orElse(null);
+        Client client = clientRepository.findByEmail(clientEmail).orElse(null);
         produit.getClients().add(client);
         client.getProduits().add(produit);
         clientRepository.save(client);
         produitRepository.save(produit);
         return true;
-        
+
     }
 
     private ProduitDTO mapToDTO(final Produit produit, final ProduitDTO produitDTO) {
@@ -173,19 +207,19 @@ public class ProduitService {
         produit.setPoids(produitDTO.getPoids());
         produit.setEstValide(produitDTO.getEstValide());
         produit.setInStock(produitDTO.getInStock());
-        final Categorie categorie = produitDTO.getCategorie() == null ? null : categorieRepository.findById(produitDTO.getCategorie())
-                .orElseThrow(() -> new NotFoundException("categorie not found"));
+        final Categorie categorie = produitDTO.getCategorie() == null ? null
+                : categorieRepository.findById(produitDTO.getCategorie())
+                        .orElseThrow(() -> new NotFoundException("categorie not found"));
         produit.setCategorie(categorie);
-        final Cooperative cooperative = produitDTO.getCooperative() == null ? null : cooperativeRepository.findById(produitDTO.getCooperative())
-                .orElseThrow(() -> new NotFoundException("cooperative not found"));
+        final Cooperative cooperative = produitDTO.getCooperative() == null ? null
+                : cooperativeRepository.findById(produitDTO.getCooperative())
+                        .orElseThrow(() -> new NotFoundException("cooperative not found"));
         produit.setCooperative(cooperative);
-        final Admin admin = produitDTO.getAdmin() == null ? null : adminRepository.findById(produitDTO.getAdmin())
-                .orElseThrow(() -> new NotFoundException("admin not found"));
+        final Admin admin = produitDTO.getAdmin() == null ? null
+                : adminRepository.findById(produitDTO.getAdmin())
+                        .orElseThrow(() -> new NotFoundException("admin not found"));
         produit.setAdmin(admin);
         return produit;
     }
-
-
-
 
 }

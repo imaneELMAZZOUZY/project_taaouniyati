@@ -3,9 +3,12 @@ package com.tatwir.taaouniyati.domain;
 import jakarta.persistence.*;
 
 import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import lombok.Getter;
 import lombok.Setter;
-
 
 @Entity
 @Getter
@@ -46,6 +49,7 @@ public class Cooperative {
     private Boolean estValide;
 
     @OneToMany(mappedBy = "cooperative")
+    @JsonIgnore
     private Set<Produit> produits;
 
     @ManyToOne(fetch = FetchType.LAZY)

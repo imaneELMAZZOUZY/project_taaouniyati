@@ -5,17 +5,27 @@ import com.tatwir.taaouniyati.model.AdminDTO;
 import com.tatwir.taaouniyati.repos.AdminRepository;
 import com.tatwir.taaouniyati.util.NotFoundException;
 import java.util.List;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
+import java.util.Optional;
 
+import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 @Service
 public class AdminService {
 
     private final AdminRepository adminRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public AdminService(final AdminRepository adminRepository) {
+    public AdminService(final AdminRepository adminRepository,
+            final PasswordEncoder passwordEncoder) {
         this.adminRepository = adminRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    public Long getAdminIdByEmail(String adminEmail) {
+        Optional<Admin> admin = adminRepository.findByEmail(adminEmail);
+        return admin.map(Admin::getId).orElse(null);
     }
 
     public List<AdminDTO> findAll() {
@@ -33,6 +43,7 @@ public class AdminService {
 
     public Long create(final AdminDTO adminDTO) {
         final Admin admin = new Admin();
+        adminDTO.setPassword(passwordEncoder.encode(adminDTO.getPassword()));
         mapToEntity(adminDTO, admin);
         return adminRepository.save(admin).getId();
     }
