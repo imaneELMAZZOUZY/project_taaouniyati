@@ -72,7 +72,7 @@ public class ClientService {
 
 
 
-    private ClientDTO mapToDTO(final Client client, final ClientDTO clientDTO) {
+    public ClientDTO mapToDTO(final Client client, final ClientDTO clientDTO) {
         clientDTO.setId(client.getId());
         clientDTO.setNom(client.getNom());
         clientDTO.setPrenom(client.getPrenom());

@@ -29,15 +29,6 @@ public class ProduitResource {
         this.produitService = produitService;
     }
 
-    @GetMapping
-    public ResponseEntity<List<ProduitDTO>> getProduitsWithFilter(
-            @RequestParam(required = false) Long cooperativeId,
-            @RequestParam(required = false) Long categorieId){
-        List<ProduitDTO> produits = produitService.getAllProduitsWithFilter(cooperativeId, categorieId);
-        return ResponseEntity.ok(produits);
-    }
-
-
     @GetMapping("/{id}")
     public ResponseEntity<ProduitDTO> getProduit(@PathVariable(name = "id") final Long id) {
         return ResponseEntity.ok(produitService.get(id));
@@ -45,8 +36,8 @@ public class ProduitResource {
 
     @PostMapping
     public ResponseEntity<Long> createProduit(HttpServletRequest request,
-                                              @ModelAttribute final ProduitDTO produitDTO,
-                                              final BindingResult bindingResult) throws MethodArgumentNotValidException {
+            @ModelAttribute final ProduitDTO produitDTO,
+            final BindingResult bindingResult) throws MethodArgumentNotValidException {
 
         if (bindingResult.hasErrors()) {
             throw new MethodArgumentNotValidException(new MethodParameter(
@@ -68,8 +59,8 @@ public class ProduitResource {
 
     @PutMapping("/{id}")
     public ResponseEntity<Long> updateProduit(HttpServletRequest request,
-                                             @PathVariable(name = "id") final Long id,
-                                              @ModelAttribute final ProduitDTO produitDTO) {
+            @PathVariable(name = "id") final Long id,
+            @ModelAttribute final ProduitDTO produitDTO) {
 
         MultipartFile photo = ((MultipartHttpServletRequest) request).getFile("productphoto");
         if (photo != null && !photo.isEmpty()) {
@@ -92,14 +83,9 @@ public class ProduitResource {
 
     @PostMapping("/interest")
 
-public ResponseEntity<Boolean> markProductAsInteresting(@RequestParam("productId") Long productId,
-                                                     @RequestParam("clientEmail") String clientEmail)
-    {
-        return ResponseEntity.ok(produitService.markProductAsInteresting(productId,clientEmail));
+    public ResponseEntity<Boolean> markProductAsInteresting(@RequestParam("productId") Long productId,
+            @RequestParam("clientEmail") String clientEmail) {
+        return ResponseEntity.ok(produitService.markProductAsInteresting(productId, clientEmail));
     }
-
-
-
-
 
 }
