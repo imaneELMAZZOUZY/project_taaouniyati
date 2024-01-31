@@ -10,16 +10,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-
+@CrossOrigin("*")
 @RestController
 @RequestMapping(value = "/api/categories", produces = MediaType.APPLICATION_JSON_VALUE)
 public class CategorieResource {
@@ -36,37 +29,35 @@ public class CategorieResource {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CategorieDTO> getCategorie(@PathVariable(name = "id") final String id) {
+    public ResponseEntity<CategorieDTO> getCategorie(@PathVariable(name = "id") final Long id) {
         return ResponseEntity.ok(categorieService.get(id));
     }
 
     @PostMapping
-    public ResponseEntity<String> createCategorie(
+    public ResponseEntity<Long> createCategorie(
             @RequestBody @Valid final CategorieDTO categorieDTO, final BindingResult bindingResult)
             throws MethodArgumentNotValidException {
-        if (!bindingResult.hasFieldErrors("id") && categorieDTO.getId() == null) {
-            bindingResult.rejectValue("id", "NotNull");
-        }
-        if (!bindingResult.hasFieldErrors("id") && categorieService.idExists(categorieDTO.getId())) {
-            bindingResult.rejectValue("id", "Exists.categorie.id");
+
+        if ( categorieService.categorieExists(categorieDTO.getNom())) {
+            bindingResult.rejectValue("categorie", "Exists.categorie");
         }
         if (bindingResult.hasErrors()) {
             throw new MethodArgumentNotValidException(new MethodParameter(
                     this.getClass().getDeclaredMethods()[0], -1), bindingResult);
         }
-        final String createdId = categorieService.create(categorieDTO);
+        final Long createdId = categorieService.create(categorieDTO);
         return new ResponseEntity<>(createdId, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateCategorie(@PathVariable(name = "id") final String id,
+    public ResponseEntity<Long> updateCategorie(@PathVariable(name = "id") final Long id,
             @RequestBody @Valid final CategorieDTO categorieDTO) {
         categorieService.update(id, categorieDTO);
         return ResponseEntity.ok(id);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCategorie(@PathVariable(name = "id") final String id) {
+    public ResponseEntity<Void> deleteCategorie(@PathVariable(name = "id") final Long id) {
         categorieService.delete(id);
         return ResponseEntity.noContent().build();
     }

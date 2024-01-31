@@ -5,7 +5,10 @@ import com.tatwir.taaouniyati.model.AdminDTO;
 import com.tatwir.taaouniyati.repos.AdminRepository;
 import com.tatwir.taaouniyati.util.NotFoundException;
 import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 
@@ -13,9 +16,11 @@ import org.springframework.stereotype.Service;
 public class AdminService {
 
     private final AdminRepository adminRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public AdminService(final AdminRepository adminRepository) {
+    public AdminService(final AdminRepository adminRepository, PasswordEncoder passwordEncoder) {
         this.adminRepository = adminRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<AdminDTO> findAll() {
@@ -25,27 +30,36 @@ public class AdminService {
                 .toList();
     }
 
-    public AdminDTO get(final String id) {
+
+    public Long getAdminIdByEmail(String adminEmail) {
+        Optional<Admin> admin = adminRepository.findByEmail(adminEmail);
+        return admin.map(Admin::getId).orElse(null);
+    }
+
+
+    public AdminDTO get(final Long id) {
         return adminRepository.findById(id)
                 .map(admin -> mapToDTO(admin, new AdminDTO()))
                 .orElseThrow(NotFoundException::new);
     }
 
-    public String create(final AdminDTO adminDTO) {
+    public Long create(final AdminDTO adminDTO) {
         final Admin admin = new Admin();
+        adminDTO.setPassword(passwordEncoder.encode(adminDTO.getPassword()));
         mapToEntity(adminDTO, admin);
-        admin.setId(adminDTO.getId());
         return adminRepository.save(admin).getId();
     }
 
-    public void update(final String id, final AdminDTO adminDTO) {
+    public void update(final Long id, final AdminDTO adminDTO) {
         final Admin admin = adminRepository.findById(id)
                 .orElseThrow(NotFoundException::new);
         mapToEntity(adminDTO, admin);
         adminRepository.save(admin);
     }
 
-    public void delete(final String id) {
+
+
+    public void delete(final Long id) {
         adminRepository.deleteById(id);
     }
 
@@ -66,8 +80,8 @@ public class AdminService {
         return admin;
     }
 
-    public boolean idExists(final String id) {
-        return adminRepository.existsByIdIgnoreCase(id);
+    public boolean EmailExists(final String email) {
+        return adminRepository.existsByEmailIgnoreCase(email);
     }
 
     public boolean emailExists(final String email) {

@@ -1,17 +1,26 @@
 package com.tatwir.taaouniyati.service;
 
 import com.tatwir.taaouniyati.domain.Client;
+import com.tatwir.taaouniyati.domain.Cooperative;
 import com.tatwir.taaouniyati.domain.Produit;
 import com.tatwir.taaouniyati.model.ClientDTO;
+import com.tatwir.taaouniyati.model.ProduitDTO;
 import com.tatwir.taaouniyati.repos.ClientRepository;
+import com.tatwir.taaouniyati.repos.CooperativeRepository;
 import com.tatwir.taaouniyati.repos.ProduitRepository;
 import com.tatwir.taaouniyati.util.NotFoundException;
 import jakarta.transaction.Transactional;
+
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StreamUtils;
 
 
 @Service
@@ -21,10 +30,30 @@ public class ClientService {
     private final ClientRepository clientRepository;
     private final ProduitRepository produitRepository;
 
+    private final CooperativeRepository cooperativeRepository;
+
+    private final PasswordEncoder passwordEncoder;
+
     public ClientService(final ClientRepository clientRepository,
-            final ProduitRepository produitRepository) {
+            final ProduitRepository produitRepository,
+                         final PasswordEncoder passwordEncoder,
+                         final CooperativeRepository cooperativeRepository) {
         this.clientRepository = clientRepository;
         this.produitRepository = produitRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.cooperativeRepository=cooperativeRepository;
+    }
+
+    public List<ClientDTO> getClientsInterested(final String cooperativeEmail) {
+        Cooperative cooperative = cooperativeRepository.findByEmail(cooperativeEmail).orElse(null);
+
+        if (cooperative == null) {
+            return Collections.emptyList();
+        }
+
+        return clientRepository.findByProduitsCooperative(cooperative).stream()
+                .map(client -> mapToDTO(client, new ClientDTO()))
+                .collect(Collectors.toList());
     }
 
     public List<ClientDTO> findAll() {
@@ -34,29 +63,33 @@ public class ClientService {
                 .toList();
     }
 
-    public ClientDTO get(final String id) {
+    public ClientDTO get(final Long id) {
         return clientRepository.findById(id)
                 .map(client -> mapToDTO(client, new ClientDTO()))
                 .orElseThrow(NotFoundException::new);
     }
 
-    public String create(final ClientDTO clientDTO) {
+    public Long create(final ClientDTO clientDTO) {
+
         final Client client = new Client();
+        clientDTO.setPassword(passwordEncoder.encode(clientDTO.getPassword()));
         mapToEntity(clientDTO, client);
-        client.setId(clientDTO.getId());
         return clientRepository.save(client).getId();
+
     }
 
-    public void update(final String id, final ClientDTO clientDTO) {
+    public void update(final Long id, final ClientDTO clientDTO) {
         final Client client = clientRepository.findById(id)
                 .orElseThrow(NotFoundException::new);
         mapToEntity(clientDTO, client);
         clientRepository.save(client);
     }
 
-    public void delete(final String id) {
+    public void delete(final Long id) {
         clientRepository.deleteById(id);
     }
+
+
 
     private ClientDTO mapToDTO(final Client client, final ClientDTO clientDTO) {
         clientDTO.setId(client.getId());
@@ -86,9 +119,6 @@ public class ClientService {
         return client;
     }
 
-    public boolean idExists(final String id) {
-        return clientRepository.existsByIdIgnoreCase(id);
-    }
 
     public boolean emailExists(final String email) {
         return clientRepository.existsByEmailIgnoreCase(email);

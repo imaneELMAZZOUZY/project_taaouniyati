@@ -4,40 +4,43 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 
 @Getter
 @Setter
 public class ProduitDTO {
 
-    @Size(max = 255)
-    private String id;
 
-    @Size(max = 255)
+    private Long id;
+
+
     private String nom;
 
-    @Size(max = 255)
+
     private String description;
 
-    @Size(max = 255)
+
     private String prix;
 
-    @Size(max = 255)
-    private String photo;
+    private byte[] photo;
 
-    @Size(max = 255)
+
     private String poids;
 
     private Boolean estValide;
 
     private Boolean inStock;
 
-    @Size(max = 255)
-    private String categorie;
 
-    @Size(max = 255)
-    private String cooperative;
+    private Long categorie;
 
-    @Size(max = 255)
-    private String admin;
+
+    private Long cooperative;
+
+
+    private Long admin;
+
+
 
 }

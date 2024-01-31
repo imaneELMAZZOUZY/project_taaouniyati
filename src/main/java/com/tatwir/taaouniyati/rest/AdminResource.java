@@ -10,16 +10,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-
+@CrossOrigin("*")
 @RestController
 @RequestMapping(value = "/api/admins", produces = MediaType.APPLICATION_JSON_VALUE)
 public class AdminResource {
@@ -36,36 +29,34 @@ public class AdminResource {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AdminDTO> getAdmin(@PathVariable(name = "id") final String id) {
+    public ResponseEntity<AdminDTO> getAdmin(@PathVariable(name = "id") final Long id) {
         return ResponseEntity.ok(adminService.get(id));
     }
 
     @PostMapping
-    public ResponseEntity<String> createAdmin(@RequestBody @Valid final AdminDTO adminDTO,
+    public ResponseEntity<Long> createAdmin(@RequestBody @Valid final AdminDTO adminDTO,
             final BindingResult bindingResult) throws MethodArgumentNotValidException {
-        if (!bindingResult.hasFieldErrors("id") && adminDTO.getId() == null) {
-            bindingResult.rejectValue("id", "NotNull");
-        }
-        if (!bindingResult.hasFieldErrors("id") && adminService.idExists(adminDTO.getId())) {
-            bindingResult.rejectValue("id", "Exists.admin.id");
+
+        if (adminService.emailExists(adminDTO.getEmail())) {
+            bindingResult.rejectValue("Email", "Exists.admin.email");
         }
         if (bindingResult.hasErrors()) {
             throw new MethodArgumentNotValidException(new MethodParameter(
                     this.getClass().getDeclaredMethods()[0], -1), bindingResult);
         }
-        final String createdId = adminService.create(adminDTO);
+        final Long createdId = adminService.create(adminDTO);
         return new ResponseEntity<>(createdId, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateAdmin(@PathVariable(name = "id") final String id,
+    public ResponseEntity<Long> updateAdmin(@PathVariable(name = "id") final Long id,
             @RequestBody @Valid final AdminDTO adminDTO) {
         adminService.update(id, adminDTO);
         return ResponseEntity.ok(id);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAdmin(@PathVariable(name = "id") final String id) {
+    public ResponseEntity<Void> deleteAdmin(@PathVariable(name = "id") final Long id) {
         adminService.delete(id);
         return ResponseEntity.noContent().build();
     }

@@ -1,12 +1,7 @@
 package com.tatwir.taaouniyati.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
+
 import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,8 +13,9 @@ import lombok.Setter;
 public class Cooperative {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false, updatable = false)
-    private String id;
+    private Long id;
 
     @Column
     private String nom;
@@ -30,14 +26,15 @@ public class Cooperative {
     @Column(nullable = false)
     private String password;
 
-    @Column(name = "\"description\"")
+    @Column
     private String description;
 
     @Column
     private String localisation;
 
-    @Column
-    private String photo;
+    @Column(length = 100000)
+    @Lob
+    private byte[] photo;
 
     @Column
     private String address;
@@ -52,7 +49,6 @@ public class Cooperative {
     private Set<Produit> produits;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "admin_id")
     private Admin admin;
 
 }

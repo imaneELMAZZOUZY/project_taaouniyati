@@ -1,25 +1,24 @@
 package com.tatwir.taaouniyati.rest;
 
+import com.tatwir.taaouniyati.domain.Client;
+import com.tatwir.taaouniyati.domain.Cooperative;
 import com.tatwir.taaouniyati.model.ClientDTO;
 import com.tatwir.taaouniyati.service.ClientService;
 import jakarta.validation.Valid;
+
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-
+@CrossOrigin("*")
 @RestController
 @RequestMapping(value = "/api/clients", produces = MediaType.APPLICATION_JSON_VALUE)
 public class ClientResource {
@@ -36,38 +35,43 @@ public class ClientResource {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ClientDTO> getClient(@PathVariable(name = "id") final String id) {
+    public ResponseEntity<ClientDTO> getClient(@PathVariable(name = "id") final Long id) {
         return ResponseEntity.ok(clientService.get(id));
     }
 
     @PostMapping
-    public ResponseEntity<String> createClient(@RequestBody @Valid final ClientDTO clientDTO,
+    public ResponseEntity<Long> createClient(@RequestBody @Valid final ClientDTO clientDTO,
             final BindingResult bindingResult) throws MethodArgumentNotValidException {
-        if (!bindingResult.hasFieldErrors("id") && clientDTO.getId() == null) {
-            bindingResult.rejectValue("id", "NotNull");
-        }
-        if (!bindingResult.hasFieldErrors("id") && clientService.idExists(clientDTO.getId())) {
-            bindingResult.rejectValue("id", "Exists.client.id");
+
+        if (clientService.emailExists(clientDTO.getEmail())) {
+            bindingResult.rejectValue("email", "Exists.client.email");
         }
         if (bindingResult.hasErrors()) {
             throw new MethodArgumentNotValidException(new MethodParameter(
                     this.getClass().getDeclaredMethods()[0], -1), bindingResult);
         }
-        final String createdId = clientService.create(clientDTO);
+        final Long createdId = clientService.create(clientDTO);
         return new ResponseEntity<>(createdId, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateClient(@PathVariable(name = "id") final String id,
+    public ResponseEntity<Long> updateClient(@PathVariable(name = "id") final Long id,
             @RequestBody @Valid final ClientDTO clientDTO) {
         clientService.update(id, clientDTO);
         return ResponseEntity.ok(id);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteClient(@PathVariable(name = "id") final String id) {
+    public ResponseEntity<Void> deleteClient(@PathVariable(name = "id") final Long id) {
         clientService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("InterestedClients")
+    public ResponseEntity<List<ClientDTO>> getClientsInterested(@RequestParam final String cooperativeEmail) {
+        return ResponseEntity.ok(clientService.getClientsInterested(cooperativeEmail));
+
+    }
+
 
 }

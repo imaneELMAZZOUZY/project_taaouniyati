@@ -4,8 +4,9 @@ import com.tatwir.taaouniyati.domain.Categorie;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 
-public interface CategorieRepository extends JpaRepository<Categorie, String> {
+public interface CategorieRepository extends JpaRepository<Categorie, Long> {
 
-    boolean existsByIdIgnoreCase(String id);
+
+    boolean existsByNomIgnoreCase(String nom);
 
 }
