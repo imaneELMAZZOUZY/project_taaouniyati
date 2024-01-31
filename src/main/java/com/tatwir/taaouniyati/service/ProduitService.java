@@ -8,6 +8,7 @@ import com.tatwir.taaouniyati.repos.ClientRepository;
 import com.tatwir.taaouniyati.repos.CooperativeRepository;
 import com.tatwir.taaouniyati.repos.ProduitRepository;
 import com.tatwir.taaouniyati.util.NotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
 import java.util.ArrayList;
@@ -28,16 +29,23 @@ public class ProduitService {
     private final CooperativeRepository cooperativeRepository;
     private final AdminRepository adminRepository;
     private final ClientRepository clientRepository;
+    private final AdminService adminService;
+
+
+
 
     public ProduitService(final ProduitRepository produitRepository,
             final CategorieRepository categorieRepository,
             final CooperativeRepository cooperativeRepository,
-            final AdminRepository adminRepository, final ClientRepository clientRepository) {
+            final AdminRepository adminRepository, final ClientRepository clientRepository,
+                          final AdminService adminService) {
         this.produitRepository = produitRepository;
         this.categorieRepository = categorieRepository;
         this.cooperativeRepository = cooperativeRepository;
         this.adminRepository = adminRepository;
         this.clientRepository = clientRepository;
+        this.adminService=adminService;
+
     }
 
 
@@ -48,6 +56,50 @@ public class ProduitService {
                 .map(produit -> mapToDTO(produit, new ProduitDTO()))
                 .collect(Collectors.toList());
     }
+
+
+    public void validerProduit(Long productId, String adminEmail) {
+        Long adminId = adminService.getAdminIdByEmail(adminEmail);
+
+        if (adminId != null) {
+            Produit produit = produitRepository.findById(productId)
+                    .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + productId));
+
+            // Faites ici les validations nécessaires avant la validation
+            Admin admin = getAdminById(adminId);
+            produit.setEstValide(true);
+            produit.setAdmin(admin);
+
+            produitRepository.save(produit);
+        } else {
+            // Gérez le cas où l'administrateur n'est pas trouvé par email
+        }
+    }
+
+    public Admin getAdminById(Long adminId) {
+        return adminRepository.findById(adminId)
+                .orElseThrow(() -> new NotFoundException("Admin not found with id: " + adminId));
+    }
+
+
+
+    public Produit getProduitById(Long produitId) {
+        return produitRepository.findById(produitId)
+                .orElseThrow(() -> new NotFoundException("Produit not found with id: " + produitId));
+    }
+
+    public List<ProduitDTO> getAllProduitsByCooperativeId(Long cooperativeId) {
+        // Récupérer tous les produits de la coopérative spécifiée sans pagination ni
+        // filtrage par catégorie
+        List<Produit> produits = produitRepository.findByCooperativeId(cooperativeId);
+
+        // Mapper les produits en ProduitDTO
+        List<ProduitDTO> produitsDTO = produits.stream()
+                .map(produit -> mapToDTO(produit, new ProduitDTO()))
+                .collect(Collectors.toList());
+
+        return produitsDTO;
+}
 
 
 

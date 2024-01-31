@@ -3,6 +3,7 @@ package com.tatwir.taaouniyati.rest;
 import com.tatwir.taaouniyati.domain.Produit;
 import com.tatwir.taaouniyati.model.ProduitDTO;
 import com.tatwir.taaouniyati.service.ProduitService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
@@ -105,6 +106,29 @@ public ResponseEntity<Boolean> markProductAsInteresting(@RequestParam("productId
         List<ProduitDTO> produitsNonValides = produitService.getProduitsNonValides();
         return ResponseEntity.ok(produitsNonValides);
     }
+
+
+    @GetMapping("/cooperative/{cooperativeId}")
+    public ResponseEntity<List<ProduitDTO>> getProduitsByCooperative(
+            @PathVariable(name = "cooperativeId") final Long cooperativeId) {
+
+        List<ProduitDTO> produits = produitService.getAllProduitsByCooperativeId(cooperativeId);
+        return ResponseEntity.ok(produits);
+    }
+
+    @PostMapping("/valider")
+    public ResponseEntity<Produit> validerProduit(@RequestParam("productId") Long productId,
+                                                  @RequestParam("adminEmail") String adminEmail) {
+        try {
+            produitService.validerProduit(productId, adminEmail);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 
 
 

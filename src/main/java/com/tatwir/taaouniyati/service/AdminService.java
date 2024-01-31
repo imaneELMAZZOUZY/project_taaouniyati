@@ -5,6 +5,8 @@ import com.tatwir.taaouniyati.model.AdminDTO;
 import com.tatwir.taaouniyati.repos.AdminRepository;
 import com.tatwir.taaouniyati.util.NotFoundException;
 import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,13 @@ public class AdminService {
                 .toList();
     }
 
+
+    public Long getAdminIdByEmail(String adminEmail) {
+        Optional<Admin> admin = adminRepository.findByEmail(adminEmail);
+        return admin.map(Admin::getId).orElse(null);
+    }
+
+
     public AdminDTO get(final Long id) {
         return adminRepository.findById(id)
                 .map(admin -> mapToDTO(admin, new AdminDTO()))
@@ -47,6 +56,8 @@ public class AdminService {
         mapToEntity(adminDTO, admin);
         adminRepository.save(admin);
     }
+
+
 
     public void delete(final Long id) {
         adminRepository.deleteById(id);
