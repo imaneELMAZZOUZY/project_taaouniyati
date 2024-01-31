@@ -2,6 +2,7 @@ package com.tatwir.taaouniyati.rest;
 
 import com.tatwir.taaouniyati.model.CooperativeDTO;
 import com.tatwir.taaouniyati.service.CooperativeService;
+import com.tatwir.taaouniyati.service.ProduitService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
@@ -23,10 +24,14 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 public class CooperativeResource {
 
     private final CooperativeService cooperativeService;
+    private final ProduitService produitService;
 
-    public CooperativeResource(final CooperativeService cooperativeService) {
+
+    public CooperativeResource(final CooperativeService cooperativeService, ProduitService produitService) {
         this.cooperativeService = cooperativeService;
-    }
+        this.produitService=produitService;
+        }
+
 
     @GetMapping
     public ResponseEntity<List<CooperativeDTO>> getAllCooperatives() {
@@ -37,6 +42,12 @@ public class CooperativeResource {
     public ResponseEntity<CooperativeDTO> getCooperative(
             @PathVariable(name = "id") final Long id) {
         return ResponseEntity.ok(cooperativeService.get(id));
+    }
+
+    @GetMapping("/email")
+    public ResponseEntity<CooperativeDTO> getCooperativeByEmail(
+            @RequestParam(name = "cooperativeEmail") final String email) {
+        return ResponseEntity.ok(cooperativeService.getByEmail(email));
     }
 
     @PostMapping
@@ -54,6 +65,7 @@ public class CooperativeResource {
         }
         MultipartFile photo = ((MultipartHttpServletRequest) request).getFile("cooperativephoto");
         if (photo != null && !photo.isEmpty()) {
+
             try {
                 byte[] logoBytes = photo.getBytes();
                 cooperativeDTO.setPhoto(logoBytes);
@@ -87,8 +99,9 @@ public class CooperativeResource {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCooperative(@PathVariable(name = "id") final Long id) {
+        produitService.deleteByCooperativeId(id);
         cooperativeService.delete(id);
         return ResponseEntity.noContent().build();
-    }
+        }
 
 }

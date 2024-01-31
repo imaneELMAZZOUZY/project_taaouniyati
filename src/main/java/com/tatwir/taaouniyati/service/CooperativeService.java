@@ -42,6 +42,12 @@ public class CooperativeService {
                 .orElseThrow(NotFoundException::new);
     }
 
+    public CooperativeDTO getByEmail(final String email) {
+        return cooperativeRepository.findByEmail(email)
+                .map(cooperative -> mapToDTO(cooperative, new CooperativeDTO()))
+                .orElseThrow(NotFoundException::new);
+    }
+
     public Long create(final CooperativeDTO cooperativeDTO) {
         final Cooperative cooperative = new Cooperative();
         cooperativeDTO.setPassword(passwordEncoder.encode(cooperativeDTO.getPassword()));

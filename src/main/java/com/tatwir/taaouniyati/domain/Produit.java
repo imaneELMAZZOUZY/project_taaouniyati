@@ -1,5 +1,6 @@
 package com.tatwir.taaouniyati.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.Set;

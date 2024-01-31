@@ -1,9 +1,12 @@
 package com.tatwir.taaouniyati.service;
 
 import com.tatwir.taaouniyati.domain.Client;
+import com.tatwir.taaouniyati.domain.Cooperative;
 import com.tatwir.taaouniyati.domain.Produit;
 import com.tatwir.taaouniyati.model.ClientDTO;
+import com.tatwir.taaouniyati.model.ProduitDTO;
 import com.tatwir.taaouniyati.repos.ClientRepository;
+import com.tatwir.taaouniyati.repos.CooperativeRepository;
 import com.tatwir.taaouniyati.repos.ProduitRepository;
 import com.tatwir.taaouniyati.util.NotFoundException;
 import jakarta.transaction.Transactional;
@@ -27,14 +30,30 @@ public class ClientService {
     private final ClientRepository clientRepository;
     private final ProduitRepository produitRepository;
 
+    private final CooperativeRepository cooperativeRepository;
+
     private final PasswordEncoder passwordEncoder;
 
     public ClientService(final ClientRepository clientRepository,
             final ProduitRepository produitRepository,
-                         final PasswordEncoder passwordEncoder) {
+                         final PasswordEncoder passwordEncoder,
+                         final CooperativeRepository cooperativeRepository) {
         this.clientRepository = clientRepository;
         this.produitRepository = produitRepository;
         this.passwordEncoder = passwordEncoder;
+        this.cooperativeRepository=cooperativeRepository;
+    }
+
+    public List<ClientDTO> getClientsInterested(final String cooperativeEmail) {
+        Cooperative cooperative = cooperativeRepository.findByEmail(cooperativeEmail).orElse(null);
+
+        if (cooperative == null) {
+            return Collections.emptyList();
+        }
+
+        return clientRepository.findByProduitsCooperative(cooperative).stream()
+                .map(client -> mapToDTO(client, new ClientDTO()))
+                .collect(Collectors.toList());
     }
 
     public List<ClientDTO> findAll() {

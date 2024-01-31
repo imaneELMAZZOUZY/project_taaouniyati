@@ -1,6 +1,7 @@
 package com.tatwir.taaouniyati.repos;
 
 import com.tatwir.taaouniyati.domain.Client;
+import com.tatwir.taaouniyati.domain.Cooperative;
 import com.tatwir.taaouniyati.domain.Produit;
 import java.util.List;
 import java.util.Optional;
@@ -15,5 +16,8 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
 
     Optional<Client> findByEmail(String email);
     boolean existsByEmailIgnoreCase(String email);
+
+    List<Client> findByProduitsCooperative(Cooperative cooperative);
+
 
 }

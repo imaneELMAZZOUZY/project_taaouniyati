@@ -1,5 +1,6 @@
 package com.tatwir.taaouniyati.rest;
 
+import com.tatwir.taaouniyati.domain.Produit;
 import com.tatwir.taaouniyati.model.ProduitDTO;
 import com.tatwir.taaouniyati.service.ProduitService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -96,6 +97,13 @@ public ResponseEntity<Boolean> markProductAsInteresting(@RequestParam("productId
                                                      @RequestParam("clientEmail") String clientEmail)
     {
         return ResponseEntity.ok(produitService.markProductAsInteresting(productId,clientEmail));
+    }
+
+
+    @GetMapping("/nonvalides")
+    public ResponseEntity<List<ProduitDTO>> getProduitsNonValides() {
+        List<ProduitDTO> produitsNonValides = produitService.getProduitsNonValides();
+        return ResponseEntity.ok(produitsNonValides);
     }
 
 

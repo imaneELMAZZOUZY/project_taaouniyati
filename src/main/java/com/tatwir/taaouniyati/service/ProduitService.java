@@ -9,7 +9,10 @@ import com.tatwir.taaouniyati.repos.CooperativeRepository;
 import com.tatwir.taaouniyati.repos.ProduitRepository;
 import com.tatwir.taaouniyati.util.NotFoundException;
 import jakarta.transaction.Transactional;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.*;
@@ -37,36 +40,17 @@ public class ProduitService {
         this.clientRepository = clientRepository;
     }
 
-//    public Page<ProduitDTO> getAllProduitsWithFilter(Long cooperativeId, Long categorieId, int page, int size) {
-//        Pageable pageable = PageRequest.of(page, size);
-//
-//
-//        ExampleMatcher exampleMatcher = ExampleMatcher.matching()
-//                .withIgnoreCase()
-//                .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
-//
-//        Produit exampleProduit = new Produit();
-//
-//        if (cooperativeId != null) {
-//            Cooperative cooperative = cooperativeRepository.findById(cooperativeId)
-//                    .orElseThrow(() -> new NotFoundException("Cooperative not found with id: " + cooperativeId));
-////            System.out.p
-//            exampleProduit.setCooperative(cooperative);
-//        }
-//
-//        if (categorieId != null) {
-//            Categorie categorie = categorieRepository.findById(categorieId)
-//                    .orElseThrow(() -> new NotFoundException("Categorie not found with id: " + categorieId));
-//            exampleProduit.setCategorie(categorie);
-//        }
-//
-//        Example<Produit> example = Example.of(exampleProduit, exampleMatcher);
-//
-//        Page<Produit> produitsPage = produitRepository.findAll(example, pageable);
-//
-//        System.out.println(produitsPage.stream().collect(Collectors.toList()));
-//        return produitsPage.map(produit -> mapToDTO(produit, new ProduitDTO()));
-//    }
+
+    public List<ProduitDTO> getProduitsNonValides() {
+        List<Produit> produitsNonValides = produitRepository.findByEstValideFalse();
+
+        return produitsNonValides.stream()
+                .map(produit -> mapToDTO(produit, new ProduitDTO()))
+                .collect(Collectors.toList());
+    }
+
+
+
 
     public List<ProduitDTO> getAllProduitsWithFilter(Long cooperativeId, Long categorieId) {
         ExampleMatcher exampleMatcher = ExampleMatcher.matching()
@@ -149,6 +133,12 @@ public class ProduitService {
         return true;
         
     }
+
+    public void deleteByCooperativeId(Long cooperativeId) {
+        produitRepository.deleteByCooperativeId(cooperativeId);
+}
+
+
 
     private ProduitDTO mapToDTO(final Produit produit, final ProduitDTO produitDTO) {
         produitDTO.setId(produit.getId());

@@ -1,9 +1,15 @@
 package com.tatwir.taaouniyati.rest;
 
+import com.tatwir.taaouniyati.domain.Client;
+import com.tatwir.taaouniyati.domain.Cooperative;
 import com.tatwir.taaouniyati.model.ClientDTO;
 import com.tatwir.taaouniyati.service.ClientService;
 import jakarta.validation.Valid;
+
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -60,5 +66,12 @@ public class ClientResource {
         clientService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("InterestedClients")
+    public ResponseEntity<List<ClientDTO>> getClientsInterested(@RequestParam final String cooperativeEmail) {
+        return ResponseEntity.ok(clientService.getClientsInterested(cooperativeEmail));
+
+    }
+
 
 }

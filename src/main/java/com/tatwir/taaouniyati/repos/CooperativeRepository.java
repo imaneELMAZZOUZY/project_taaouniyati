@@ -12,4 +12,6 @@ public interface CooperativeRepository extends JpaRepository<Cooperative, Long> 
     boolean existsByEmailIgnoreCase(String email);
 
     Optional<Cooperative> findByEmail(String email);
+
+
 }
